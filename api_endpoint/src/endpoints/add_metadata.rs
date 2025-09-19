@@ -19,7 +19,14 @@ pub struct AddMetadata {
 
 fn compute_metadata_hash(email: &str, tax_state: &str, salt: &str) -> String {
     let separator = "|";
-    let data = format!("{}{}{}{}{}", email, separator, tax_state.replace("|", ""), separator, salt);
+    let data = format!(
+        "{}{}{}{}{}",
+        email,
+        separator,
+        tax_state.replace("|", ""),
+        separator,
+        salt
+    );
 
     let mut hasher = Sha256::new();
     hasher.update(data.as_bytes());
@@ -50,7 +57,9 @@ pub async fn handler(
     let bson_doc = match mongodb::bson::to_bson(&query) {
         Ok(bson) => bson,
         Err(err) => {
-            state.logger.severe(format!("Failed to serialize to BSON: {}", err));
+            state
+                .logger
+                .severe(format!("Failed to serialize to BSON: {}", err));
             return get_error("Internal server error".to_string());
         }
     };
@@ -59,12 +68,16 @@ pub async fn handler(
         match metadata_collection.insert_one(document, None).await {
             Ok(_) => (),
             Err(err) => {
-                state.logger.severe(format!("Failed to insert document: {}", err));
+                state
+                    .logger
+                    .severe(format!("Failed to insert document: {}", err));
                 return get_error("Internal server error".to_string());
             }
         }
     } else {
-        state.logger.severe("Failed to create BSON document".to_string());
+        state
+            .logger
+            .severe("Failed to create BSON document".to_string());
         return get_error("Internal server error".to_string());
     }
 

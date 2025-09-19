@@ -31,12 +31,12 @@ pub async fn handler(
 
     // Check if email already exists
     let filter = mongodb::bson::doc! { "email": &query.email };
-    let result = match collection
-        .find_one(filter, None)
-        .await {
+    let result = match collection.find_one(filter, None).await {
         Ok(res) => res,
         Err(err) => {
-            state.logger.severe(format!("Failed to execute find_one: {}", err));
+            state
+                .logger
+                .severe(format!("Failed to execute find_one: {}", err));
             return get_error("Internal server error".to_string());
         }
     };
@@ -72,7 +72,9 @@ pub async fn handler(
     }) {
         Ok(bson) => bson,
         Err(err) => {
-            state.logger.severe(format!("Failed to serialize to BSON: {}", err));
+            state
+                .logger
+                .severe(format!("Failed to serialize to BSON: {}", err));
             return get_error("Internal server error".to_string());
         }
     };

@@ -7,22 +7,22 @@ use crate::{
 use axum::{extract::State, response::IntoResponse, Json};
 use reqwest::StatusCode;
 use serde_derive::{Deserialize, Serialize};
-use starknet::core::types::FieldElement;
+use starknet::core::types::Felt;
 
 #[derive(Deserialize)]
 pub struct MailSubscribeQuery {
-    tx_hash: FieldElement,
+    tx_hash: Felt,
     groups: Vec<String>,
 }
 
 #[derive(Serialize)]
 pub struct MailSubscribeDoc {
     #[serde(serialize_with = "field_element_to_hex")]
-    tx_hash: FieldElement,
+    tx_hash: Felt,
     group: String,
 }
 
-fn field_element_to_hex<S>(fe: &FieldElement, serializer: S) -> Result<S::Ok, S::Error>
+fn field_element_to_hex<S>(fe: &Felt, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
 {
@@ -46,10 +46,12 @@ pub async fn handler(
         let bson_doc = match mongodb::bson::to_bson(&MailSubscribeDoc {
             tx_hash: query.tx_hash,
             group,
-        }){
+        }) {
             Ok(bson) => bson,
             Err(err) => {
-                state.logger.severe(format!("Failed to serialize to BSON: {}", err));
+                state
+                    .logger
+                    .severe(format!("Failed to serialize to BSON: {}", err));
                 return get_error("Internal server error".to_string());
             }
         };
@@ -58,12 +60,16 @@ pub async fn handler(
             match emails_collection.insert_one(document, None).await {
                 Ok(_) => (),
                 Err(err) => {
-                    state.logger.severe(format!("Failed to insert document: {}", err));
+                    state
+                        .logger
+                        .severe(format!("Failed to insert document: {}", err));
                     return get_error("Internal server error".to_string());
                 }
             }
         } else {
-            state.logger.severe("Failed to create BSON document".to_string());
+            state
+                .logger
+                .severe("Failed to create BSON document".to_string());
             return get_error("Internal server error".to_string());
         }
     }
