@@ -19,7 +19,10 @@ use tower_http::cors::{Any, CorsLayer};
 async fn main() {
     let conf = config::load();
     let logger = Logger::new(&conf.watchtower);
-    logger.info(format!("starting v{} of api_endpoint", env!("CARGO_PKG_VERSION")));
+    logger.info(format!(
+        "starting v{} of api_endpoint",
+        env!("CARGO_PKG_VERSION")
+    ));
     let client_options = ClientOptions::parse(&conf.database.connection_string)
         .await
         .unwrap();

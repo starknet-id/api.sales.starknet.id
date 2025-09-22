@@ -1,4 +1,4 @@
-use starknet::core::types::FieldElement;
+use starknet::core::types::Felt;
 use std::fmt::Write;
 
 #[macro_export]
@@ -11,7 +11,7 @@ macro_rules! pub_struct {
     }
 }
 
-pub fn to_hex(felt: FieldElement) -> String {
+pub fn to_hex(felt: Felt) -> String {
     let bytes = felt.to_bytes_be();
 
     if bytes.iter().all(|&b| b == 0) {
@@ -31,23 +31,23 @@ pub fn to_hex(felt: FieldElement) -> String {
 
 mod utils_tests {
     use super::to_hex;
-    use starknet::core::types::FieldElement;
+    use starknet::core::types::Felt;
 
     #[test]
     fn test_to_hex_small_number() {
-        let num = FieldElement::from(255u64);
+        let num = Felt::from(255u64);
         assert_eq!(to_hex(num), "0xff");
     }
 
     #[test]
     fn test_to_hex_large_number() {
-        let num = FieldElement::from(1234567890u64);
+        let num = Felt::from(1234567890u64);
         assert_eq!(to_hex(num), "0x499602d2");
     }
 
     #[test]
     fn test_single_digit() {
-        let num = FieldElement::from(10u64);
+        let num = Felt::from(10u64);
         assert_eq!(to_hex(num), "0x0a");
     }
 
@@ -60,14 +60,14 @@ mod utils_tests {
         ];
 
         for (input, expected) in cases {
-            let num = FieldElement::from(input);
+            let num = Felt::from(input);
             assert_eq!(to_hex(num), expected);
         }
     }
 
     #[test]
     fn test_to_hex_max() {
-        let max = FieldElement::MAX;
+        let max = Felt::MAX;
         assert_eq!(to_hex(max).len(), 66);
         assert!(to_hex(max).starts_with("0x"));
     }
